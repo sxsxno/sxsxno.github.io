@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-12-22T11:37:32.625Z</updated>
+  <updated>2024-12-22T11:40:34.648Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>友情链接</title>
+    <link href="http://example.com/2024/12/22/%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/"/>
+    <id>http://example.com/2024/12/22/%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/</id>
+    <published>2024-12-22T11:38:18.000Z</published>
+    <updated>2024-12-22T11:40:34.648Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="友情链接"><a href="#友情链接" class="headerlink" title="友情链接"></a><center>友情链接</center></h1><div class="post-body">   <div id="links">      <style>         .links-content{         margin-top:1rem;         }         .link-navigation::after {         content: " ";         display: block;         clear: both;         }         .card {         width: 45%;         font-size: 1rem;         padding: 10px 20px;         border-radius: 4px;         transition-duration: 0.15s;         margin-bottom: 1rem;         display:flex;         }         .card:nth-child(odd) {         float: left;         }         .card:nth-child(even) {         float: right;         }         .card:hover {         transform: scale(1.1);         box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04);         }         .card a {         border:none;         }         .card .ava {         width: 3rem!important;         height: 3rem!important;         margin:0!important;         margin-right: 1em!important;         border-radius:4px;         }         .card .card-header {         font-style: italic;         overflow: hidden;         width: 100%;         }         .card .card-header a {         font-style: normal;         color: #2bbc8a;         font-weight: bold;         text-decoration: none;         }         .card .card-header a:hover {         color: #d480aa;         text-decoration: none;         }         .card .card-header .info {         font-style:normal;         color:#a3a3a3;         font-size:14px;         min-width: 0;         overflow: hidden;         white-space: nowrap;         }      </style>      <div class="links-content">         <div class="link-navigation">            <div class="card">               <img class="ava" src="https://www.hkbinbin.fun/img/avatar-png_hu10339090195609915633.png" />               <div class="card-header">                  <div>                     <a href="https://www.hkbinbin.fun/">hkbin</a>                  </div>                  <div class="info">hkbin的小博客~</div>               </div>            </div>         </div>      </div>   </div></div></section></body>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;友情链接&quot;&gt;&lt;a href=&quot;#友情链接&quot; class=&quot;headerlink&quot; title=&quot;友情链接&quot;&gt;&lt;/a&gt;&lt;center&gt;友情链接&lt;/center&gt;&lt;/h1&gt;&lt;div class=&quot;post-body&quot;&gt;
+   &lt;div id=&quot;links&quot;&gt;
+    </summary>
+      
+    
+    
+    
+    
+    <category term="Links" scheme="http://example.com/tags/Links/"/>
+    
+  </entry>
   
   <entry>
     <title>2024强网杯决赛 Re 部分 WP</title>
