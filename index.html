@@ -292,6 +292,113 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/11/04/2026%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%E4%B8%AA%E4%BA%BA%E9%A2%98%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/web-app-manifest-512x512.png">
+      <meta itemprop="name" content="Munan">
+      <meta itemprop="description" content="网络安全爱好者">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Munan's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/11/04/2026%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%E4%B8%AA%E4%BA%BA%E9%A2%98%E8%A7%A3/" class="post-title-link" itemprop="url">2026腾讯游戏安全技术竞赛-PC客户端安全-个人题解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-11-04 22:20:00 / 修改时间：22:15:59" itemprop="dateCreated datePublished" datetime="2026-11-04T22:20:00+08:00">2026-11-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛"><a href="#2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛" class="headerlink" title="2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛"></a>2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛</h1><p>赛题把「影子组织」的控制中枢「根」摆在面前：一个 <code>shadow_panel.exe</code> 要求输入 16 字节的终止密码，而它真正的校验逻辑根本不在用户态，甚至不在驱动里——只有先让程序把机器虚拟化掉，才能看到那段代码。</p>
+<p>六个评分点其实就是一条完整的攻击链：怎么装上去 → 装上去做了什么 → 怎么检测 → 怎么拿到密码 → 怎么在别的机器上也算出来。下面按这条顺序记录。</p>
+<table>
+<thead>
+<tr>
+<th align="left">#</th>
+<th align="left">要求</th>
+<th align="left">分值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">找到部署条件，成功运行 <code>shadow_panel.exe</code> 进入密码终端</td>
+<td align="left">0.5</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">分析对操作系统底层攻击、隐藏核心代码的完整实现</td>
+<td align="left">2.5</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">编写检测代码，检测该攻击手法</td>
+<td align="left">2.0</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">计算出终止密码</td>
+<td align="left">1.0</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">编写 keygen，任意机器任意一次运行都能算出密码</td>
+<td align="left">2.5</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left">完整解题过程与源码</td>
+<td align="left">1.5</td>
+</tr>
+</tbody></table>
+<p>环境：VMware 里的 Windows 10 1909（开启嵌套虚拟化 &#x2F; VT-x），IDA Pro、VMware debug stub + gdb、Python 3.10。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/11/04/2026%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%E4%B8%AA%E4%BA%BA%E9%A2%98%E8%A7%A3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2025/04/03/2025%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF-%E9%A2%98%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -725,12 +832,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -757,7 +864,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2025</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
