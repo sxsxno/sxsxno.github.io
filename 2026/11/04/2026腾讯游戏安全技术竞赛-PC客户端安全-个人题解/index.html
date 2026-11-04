@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛赛题把「影子组织」的控制中枢「根」摆在面前：一个 shadow_panel.exe 要求输入 16 字节的终止密码，而它真正的校验逻辑根本不在用户态，甚至不在驱动里——只有先让程序把机器虚拟化掉，才能看到那段代码。 六个评分点其实就是一条完整的攻击链：怎么装上去 → 装上去做了什么 → 怎么检测 → 怎么拿到密码 → 怎么在别的机器上也">
+  <meta name="description" content="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)启动阶段执行了如下操作： Phase 0（sub_144A07540）：Hyper-V + IOMMU 检测  CPUID(1) → 检查 ECX bit 31（Hypervisor">
 <meta property="og:type" content="article">
 <meta property="og:title" content="2026腾讯游戏安全技术竞赛-PC客户端安全-个人题解">
 <meta property="og:url" content="http://example.com/2026/11/04/2026%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%E4%B8%AA%E4%BA%BA%E9%A2%98%E8%A7%A3/index.html">
 <meta property="og:site_name" content="Munan&#39;s blog">
-<meta property="og:description" content="2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛赛题把「影子组织」的控制中枢「根」摆在面前：一个 shadow_panel.exe 要求输入 16 字节的终止密码，而它真正的校验逻辑根本不在用户态，甚至不在驱动里——只有先让程序把机器虚拟化掉，才能看到那段代码。 六个评分点其实就是一条完整的攻击链：怎么装上去 → 装上去做了什么 → 怎么检测 → 怎么拿到密码 → 怎么在别的机器上也">
+<meta property="og:description" content="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)启动阶段执行了如下操作： Phase 0（sub_144A07540）：Hyper-V + IOMMU 检测  CPUID(1) → 检查 ECX bit 31（Hypervisor">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/tx2026/01-panel.png">
 <meta property="og:image" content="http://example.com/images/tx2026/02-driver-rename.png">
@@ -39,6 +39,7 @@
 <meta property="og:image" content="http://example.com/images/tx2026/10-hidden-code.png">
 <meta property="og:image" content="http://example.com/images/tx2026/11-probe-before.png">
 <meta property="og:image" content="http://example.com/images/tx2026/12-probe-after.png">
+<meta property="og:image" content="http://example.com/images/tx2026/10-hidden-code.png">
 <meta property="og:image" content="http://example.com/images/tx2026/13-subleaf-dispatch.png">
 <meta property="og:image" content="http://example.com/images/tx2026/14-verify-logic.png">
 <meta property="og:image" content="http://example.com/images/tx2026/15-key-in-page.png">
@@ -49,7 +50,7 @@
 <meta property="og:image" content="http://example.com/images/tx2026/20-keygen-found.png">
 <meta property="og:image" content="http://example.com/images/tx2026/21-keygen-success.png">
 <meta property="article:published_time" content="2026-11-04T14:20:00.000Z">
-<meta property="article:modified_time" content="2026-11-04T14:18:23.417Z">
+<meta property="article:modified_time" content="2026-11-04T14:28:23.226Z">
 <meta property="article:author" content="Munan">
 <meta property="article:tag" content="Reverse Windows Driver VT-x Hyper-V">
 <meta name="twitter:card" content="summary">
@@ -198,7 +199,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-11-04 22:20:00 / 修改时间：22:18:23" itemprop="dateCreated datePublished" datetime="2026-11-04T22:20:00+08:00">2026-11-04</time>
+              <time title="创建时间：2026-11-04 22:20:00 / 修改时间：22:28:23" itemprop="dateCreated datePublished" datetime="2026-11-04T22:20:00+08:00">2026-11-04</time>
             </span>
 
           
@@ -212,188 +213,95 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛"><a href="#2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛" class="headerlink" title="2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛"></a>2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛</h1><p>赛题把「影子组织」的控制中枢「根」摆在面前：一个 <code>shadow_panel.exe</code> 要求输入 16 字节的终止密码，而它真正的校验逻辑根本不在用户态，甚至不在驱动里——只有先让程序把机器虚拟化掉，才能看到那段代码。</p>
-<p>六个评分点其实就是一条完整的攻击链：怎么装上去 → 装上去做了什么 → 怎么检测 → 怎么拿到密码 → 怎么在别的机器上也算出来。下面按这条顺序记录。</p>
-<table>
-<thead>
-<tr>
-<th align="left">#</th>
-<th align="left">要求</th>
-<th align="left">分值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">1</td>
-<td align="left">找到部署条件，成功运行 <code>shadow_panel.exe</code> 进入密码终端</td>
-<td align="left">0.5</td>
-</tr>
-<tr>
-<td align="left">2</td>
-<td align="left">分析对操作系统底层攻击、隐藏核心代码的完整实现</td>
-<td align="left">2.5</td>
-</tr>
-<tr>
-<td align="left">3</td>
-<td align="left">编写检测代码，检测该攻击手法</td>
-<td align="left">2.0</td>
-</tr>
-<tr>
-<td align="left">4</td>
-<td align="left">计算出终止密码</td>
-<td align="left">1.0</td>
-</tr>
-<tr>
-<td align="left">5</td>
-<td align="left">编写 keygen，任意机器任意一次运行都能算出密码</td>
-<td align="left">2.5</td>
-</tr>
-<tr>
-<td align="left">6</td>
-<td align="left">完整解题过程与源码</td>
-<td align="left">1.5</td>
-</tr>
-</tbody></table>
-<p>环境：VMware 里的 Windows 10 1909（开启嵌套虚拟化 &#x2F; VT-x），IDA Pro、VMware debug stub + gdb、Python 3。</p>
+        <h2 id="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow-panel-exe，控制台程序成功运行进入至输入终止密码的终端。-满分0-5分"><a href="#「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow-panel-exe，控制台程序成功运行进入至输入终止密码的终端。-满分0-5分" class="headerlink" title="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)"></a>「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)</h2><p>启动阶段执行了如下操作：</p>
+<p>Phase 0（sub_144A07540）：Hyper-V + IOMMU 检测</p>
+<ol>
+<li><p>CPUID(1) → 检查 ECX bit 31（Hypervisor Present bit）</p>
+</li>
+<li><p>CPUID(0x40000000) → 验证 Hypervisor vendor &#x3D; “Microsoft Hv”</p>
+</li>
+<li><p>IOMMU (DMAR&#x2F;IVRS) → 通过 NtQuerySystemInformation(76) 查询 ACPI 固件表，检查是否存在：</p>
+</li>
+</ol>
+<p>   - Intel VT-d: DMAR 表签名 0x52414D44</p>
+<p>   - AMD-Vi: IVRS 表签名 0x53525649</p>
+<p>Phase 1（sub_144A075F0）：VHD路径准备</p>
+<ul>
+<li><p>准备 VHD 部署路径 C:\Windows\Temp\WdiServiceHost\</p>
+</li>
+<li><p>清理旧文件</p>
+</li>
+</ul>
+<p>Phase 2（sub_144A07620）：驱动部署</p>
+<ul>
+<li>调用 sub_144A05540 进行驱动部署：</li>
+</ul>
+<p>  1. 先执行 CPUID(0xDEADBEEF, 0x114514)，若 EAX &#x3D;&#x3D; 0x01919810 则说明hypervisor已活跃，跳过部署</p>
+<p>  2. 生成随机服务名，构建路径 + “.sys”</p>
+<p>  3. CreateFileW → WriteFile（驱动blob来自 .data 段 unk_145CCA010）→ CloseHandle</p>
+<p>  4. 通过.tvm0中的代码创建&#x2F;挂载VHD并部署驱动</p>
+<p>  5. OpenSCManagerW → 清理服务 → DeleteFileW</p>
+<p>Phase 3（sub_144A07650）：Hypervisor激活验证</p>
+<ul>
+<li><p>再次 CPUID(0xDEADBEEF, 0x114514)</p>
+</li>
+<li><p>验证 EAX &#x3D;&#x3D; 0x01919810（26318864 十进制）</p>
+</li>
+<li><p>确认 HyperCharge hypervisor 已成功安装并激活</p>
+</li>
+</ul>
+<p>因此需要机器需要支持IOMMU，并且开启了Hyper-V之后，通过管理员权限启动shadow_panel.exe即可进入输入密码的终端。启动后可以看见输入框</p>
+<p><img src="/images/tx2026/01-panel.png"></p>
 <span id="more"></span>
 
-<h2 id="1-让它跑起来：部署条件"><a href="#1-让它跑起来：部署条件" class="headerlink" title="1 让它跑起来：部署条件"></a>1 让它跑起来：部署条件</h2><p>直接双击 <code>shadow_panel.exe</code> 是进不到密码输入框的，要么闪退，要么什么都不发生。先静态看启动流程，它被拆成清晰的四个 Phase。</p>
-<h3 id="Phase-0：Hyper-V-IOMMU-检测（sub-144A07540）"><a href="#Phase-0：Hyper-V-IOMMU-检测（sub-144A07540）" class="headerlink" title="Phase 0：Hyper-V + IOMMU 检测（sub_144A07540）"></a>Phase 0：Hyper-V + IOMMU 检测（<code>sub_144A07540</code>）</h3><ol>
-<li><code>CPUID(1)</code> → 检查 ECX 的 bit 31（Hypervisor Present）；</li>
-<li><code>CPUID(0x40000000)</code> → 校验 Hypervisor vendor 是否为 <code>&quot;Microsoft Hv&quot;</code>；</li>
-<li>IOMMU：通过 <code>NtQuerySystemInformation</code>（类 76）查询 ACPI 固件表，检查是否存在 Intel VT-d 的 <code>DMAR</code> 表（签名 <code>0x52414D44</code>）或 AMD-Vi 的 <code>IVRS</code> 表（签名 <code>0x53525649</code>）。</li>
-</ol>
-<p>三者缺一不可，这就是为什么在很多机器上它「装不上」。</p>
-<h3 id="Phase-1：VHD-路径准备（sub-144A075F0）"><a href="#Phase-1：VHD-路径准备（sub-144A075F0）" class="headerlink" title="Phase 1：VHD 路径准备（sub_144A075F0）"></a>Phase 1：VHD 路径准备（<code>sub_144A075F0</code>）</h3><p>准备 VHD 部署路径 <code>C:\Windows\Temp\WdiServiceHost\</code>，并清理残留的旧文件。目录名看起来像是 Windows 自带的诊断服务，属于很典型的白利用路径选择。</p>
-<h3 id="Phase-2：驱动部署（sub-144A07620-→-sub-144A05540）"><a href="#Phase-2：驱动部署（sub-144A07620-→-sub-144A05540）" class="headerlink" title="Phase 2：驱动部署（sub_144A07620 → sub_144A05540）"></a>Phase 2：驱动部署（<code>sub_144A07620</code> → <code>sub_144A05540</code>）</h3><ol>
-<li>先执行 <code>CPUID(0xDEADBEEF, 0x114514)</code>，若 <code>EAX == 0x01919810</code> 说明 hypervisor 已经活跃，直接跳过部署；</li>
-<li>生成随机服务名，拼接出 <code>xxx.sys</code> 的路径；</li>
-<li><code>CreateFileW</code> → <code>WriteFile</code>（驱动 blob 来自 <code>.data</code> 段的 <code>unk_145CCA010</code>）→ <code>CloseHandle</code>，先把内嵌驱动释放到磁盘；</li>
-<li>通过 <code>.tvm0</code> 段中的代码创建、挂载 VHD 并部署驱动；</li>
-<li><code>OpenSCManagerW</code> → 清理服务 → <code>DeleteFileW</code>，把痕迹擦掉。</li>
-</ol>
-<p>VHD 容器在这里的作用是绕过驱动签名强制（DSE）：驱动不是从普通目录直接加载的，而是通过虚拟磁盘挂载点间接加载。</p>
-<h3 id="Phase-3：Hypervisor-激活验证（sub-144A07650）"><a href="#Phase-3：Hypervisor-激活验证（sub-144A07650）" class="headerlink" title="Phase 3：Hypervisor 激活验证（sub_144A07650）"></a>Phase 3：Hypervisor 激活验证（<code>sub_144A07650</code>）</h3><p>再发一次 <code>CPUID(0xDEADBEEF, 0x114514)</code>，确认 <code>EAX == 0x01919810</code>（十进制 26318864），才认为 HyperCharge hypervisor 安装并激活成功。</p>
-<p><strong>结论</strong>：机器需要支持 IOMMU，并且开启了 Hyper-V；用管理员权限启动 <code>shadow_panel.exe</code> 即可进入密码输入终端。</p>
-<p><img src="/images/tx2026/01-panel.png" alt="进入密码输入终端"></p>
-<p>顺带一提，<code>0x114514</code>、<code>0x1919810</code>、<code>0xDEADBEEF</code>、<code>0xB16B00B5</code> 这组 leaf&#x2F;subleaf 明显是出题人的恶趣味，但正是这组「魔法数」成了后面所有题目的入口。</p>
-<h2 id="2-它到底做了什么：底层攻击与代码隐藏"><a href="#2-它到底做了什么：底层攻击与代码隐藏" class="headerlink" title="2 它到底做了什么：底层攻击与代码隐藏"></a>2 它到底做了什么：底层攻击与代码隐藏</h2><p>题目在内嵌的资源里放了一个 <code>.sys</code>。程序初始化时把它重命名为一个随机字符串再加载，所以第一次跑完之后，磁盘上根本找不到原始文件名。</p>
-<p><img src="/images/tx2026/02-driver-rename.png" alt="驱动被随机重命名后加载"></p>
-<p>驱动本体受到 TVM 保护。</p>
-<p><img src="/images/tx2026/03-tvm-1.png" alt="驱动 .tvm0 段"></p>
-<p><img src="/images/tx2026/04-tvm-2.png" alt="虚拟化层调用链"></p>
-<p><code>.tvm0</code> 段里的逻辑被虚拟化得很深，一条指令要经过解释器走十几步，硬逆基本不现实。于是换个角度：不逆代码，先看它调了哪些 API，把行为序列 dump 出来。</p>
-<p><img src="/images/tx2026/05-api-dump.png" alt="驱动调用序列"></p>
-<p>序列里有很明显的「申请物理内存 + 进行 mapping」的组合，联想到程序强制要求开启 Hyper-V，再加上调试时能确认 <code>.exe</code> 侧的校验是通过 <code>CPUID</code> 指令完成的（它的通信封装 <code>sub_144A12290</code> 就是个裸 <code>cpuid</code>，把 leaf、subleaf、两个 64 位参数分别塞进 EAX&#x2F;ECX&#x2F;EBX&#x2F;EDX），基本可以判断这是一套 VT-x 的 hypervisor rootkit。</p>
-<p><img src="/images/tx2026/06-cpuid-check.png" alt="CPUID 通信封装"></p>
-<p>这一步我有用 AI 辅助分析，把 CPUID 包装函数和周围的 CFF 混淆理了一遍，确认数据流。</p>
-<p><img src="/images/tx2026/07-ai-flow.png" alt="AI 辅助理出的 check 流程"></p>
-<p>我的猜测是：驱动把一段 VMX 代码页映射到 EPT 中操作系统「看不见」的区域。要验证这个猜测，静态分析已经没用了，只能上调试器。</p>
-<p>先用 VMware 的 debug stub 连上虚拟机，取到进程内存基址。</p>
-<p><img src="/images/tx2026/08-imagebase.png" alt="获取内存基址"></p>
-<p>然后在用户态程序执行 <code>cpuid</code> 之前下断点。</p>
-<p><img src="/images/tx2026/09-gdb-break.png" alt="gdb 下断"></p>
-<p>单步执行，程序就跳进了一段全新的代码——这段代码在 IDA 里查不到，也不属于任何已加载模块。</p>
-<p><img src="/images/tx2026/10-hidden-code.png" alt="执行流进入隐藏代码"></p>
-<p>里面能看到 <code>vmresume</code>、<code>vmlaunch</code> 这些指令，确认走的就是 Hyper-V&#x2F;VT-x 那一层。</p>
-<p>至此整条链路可以实锤了：</p>
-<ol>
-<li>程序运行后加载一个隐藏的驱动；</li>
-<li>驱动申请物理内存，并把代码映射到操作系统不可见的区域；</li>
-<li>所有 VMX 指令在运行时由驱动动态生成，所以即使拿到完整驱动二进制，反汇编器里也搜不到任何 VMX 指令；</li>
-<li>最后由程序执行 <code>CPUID</code> 触发 VM-Exit，真正的校验逻辑在 hypervisor 层完成。</li>
-</ol>
-<p>这种「把自己插到 OS 和硬件之间、让原系统变成 Guest」的手法，就是教科书里的 Blue Pill。区别在于这里不是教科书上的简单版：它做了 EPT 代码隐藏、动态指令生成、TVM 虚拟化三重保护。</p>
-<h2 id="3-检测代码：怎么发现这台机器被「插」了一针"><a href="#3-检测代码：怎么发现这台机器被「插」了一针" class="headerlink" title="3 检测代码：怎么发现这台机器被「插」了一针"></a>3 检测代码：怎么发现这台机器被「插」了一针</h2><p>检测思路其实第一条题已经给了：程序每次启动都会先执行 <code>CPUID(0xDEADBEEF, 0x114514)</code>，若 <code>EAX == 0x01919810</code> 就认为 hypervisor 已活跃、跳过部署。</p>
-<p>那我主动发同样的请求就行了——返回 <code>0x01919810</code>，说明这台机器的 VMX 代码已经被注入了。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> HYPERCHARGE_CPUID_LEAF    0xDEADBEEF</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HYPERCHARGE_CPUID_SUBLEAF 0x114514</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HYPERCHARGE_SIGNATURE     0x01919810</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">detect_cpuid_probe</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> regs[<span class="number">4</span>] = &#123;<span class="number">0</span>&#125;;   <span class="comment">/* EAX, EBX, ECX, EDX */</span></span><br><span class="line"></span><br><span class="line">    __cpuidex(regs, HYPERCHARGE_CPUID_LEAF, HYPERCHARGE_CPUID_SUBLEAF);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((<span class="type">unsigned</span>)regs[<span class="number">0</span>] == HYPERCHARGE_SIGNATURE) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[!] DETECTED: HyperCharge hypervisor is ACTIVE\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] CPUID probe: No hypervisor signature found.\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>部署前发请求的结果，<code>EAX</code> 是普通的 CPU 返回值：</p>
-<p><img src="/images/tx2026/11-probe-before.png" alt="部署前探测"></p>
-<p>部署后同样的请求，<code>EAX</code> 变成了签名值：</p>
-<p><img src="/images/tx2026/12-probe-after.png" alt="部署后探测"></p>
-<p>除了 CPUID 探针，完整版还加了几个辅助判据：<code>C:\Windows\Temp\WdiServiceHost\</code> 下的 <code>.vhd</code> 残留、ACPI 表里 <code>DMAR</code>&#x2F;<code>IVRS</code> 的存在性、CPUID 在 hypervisor 下的耗时差异、以及服务&#x2F;驱动残留扫描。这些都属于佐证，真正决定性的还是 CPUID 探针。</p>
-<p>也可以按往年题目的思路，直接检测「当前是否处在 VT 环境下」（比如测 MSR 行为、比较 <code>rdtsc</code> 抖动），参见 <a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-286460.htm">看雪上相关讨论</a>。但相比之下，直接跟它的协议对话是最干净的——不用猜，它自己会回答。</p>
-<p>检测工具源码见附件 <code>detect_hypercharge.c</code>。</p>
-<h2 id="4-终止密码：进到-VMX-里去看"><a href="#4-终止密码：进到-VMX-里去看" class="headerlink" title="4 终止密码：进到 VMX 里去看"></a>4 终止密码：进到 VMX 里去看</h2><p>既然（2）里已经能用 debug stub 单步进到隐藏代码，那拿密码就是顺水推舟——进到 VMX 实际执行的代码段，一路跟到 subleaf 的分发逻辑。</p>
-<p><img src="/images/tx2026/13-subleaf-dispatch.png" alt="subleaf 分发"></p>
-<p>分发进去之后就是校验密码的代码。</p>
-<p><img src="/images/tx2026/14-verify-logic.png" alt="密码校验逻辑"></p>
-<p>这里有两种做法，调试党可以偷懒，逆向党可以硬啃：</p>
-<ul>
-<li><strong>调试</strong>：直接在 <code>cpuid</code> 前后读 <code>r8</code>、<code>r9</code>，就能拿到本次期望的密钥&#x2F;中间值，拼起来就是密码；</li>
-<li><strong>逆向</strong>：key 来自 <code>[page+0x500]</code> 和 <code>[page+0x508]</code>，把校验算法还原出来。</li>
-</ul>
-<p><img src="/images/tx2026/15-key-in-page.png" alt="密钥取自 page+0x500 / page+0x508"></p>
-<p>把算法照抄成脚本，模拟执行也能得到同样的结果。</p>
-<p><img src="/images/tx2026/16-sim-algo.png" alt="模拟算法"></p>
-<p><img src="/images/tx2026/17-sim-result-1.png" alt="模拟结果 1"></p>
-<p><img src="/images/tx2026/18-sim-result-2.png" alt="模拟结果 2"></p>
-<h2 id="5-Keygen：换个机器也得能算出来"><a href="#5-Keygen：换个机器也得能算出来" class="headerlink" title="5 Keygen：换个机器也得能算出来"></a>5 Keygen：换个机器也得能算出来</h2><p>第 4 题的做法有个致命前提：得能读那个 page。而一旦程序进入 VT 环境，那个页基本就读不到了——你没法在自己被虚拟化的同时去读 host 侧的内存，所以密钥拿不到。</p>
-<p>那就只剩两条路：</p>
-<ol>
-<li>逆驱动，搞清 <code>[page+0x500]</code> &#x2F; <code>[page+0x508]</code> 到底是怎么写进去的；</li>
-<li>找出密钥的生成规律，自己算。</li>
-</ol>
-<p>先试第一条。调试一段时间后发现，VMX 代码是由 <code>sub_14000FC40</code> 处的代码<strong>动态生成</strong>的，这也能解释为什么驱动本体里一条 VMX 指令都搜不到。但这一段虚拟化程度太深，大部分逻辑最终会跑到 <code>.tvm0</code> 段执行，逆起来极其痛苦。</p>
-<p>于是转第二条：多拿几个密钥看规律。在多个虚拟机里分别调试取值，其中两组：</p>
+<h2 id="「根」使用特殊方法，对操作系统底层进行了攻击，并借此将关键核心代码隐藏了起来，分析其完整实现流程。（满分2-5分）"><a href="#「根」使用特殊方法，对操作系统底层进行了攻击，并借此将关键核心代码隐藏了起来，分析其完整实现流程。（满分2-5分）" class="headerlink" title="「根」使用特殊方法，对操作系统底层进行了攻击，并借此将关键核心代码隐藏了起来，分析其完整实现流程。（满分2.5分）"></a>「根」使用特殊方法，对操作系统底层进行了攻击，并借此将关键核心代码隐藏了起来，分析其完整实现流程。（满分2.5分）</h2><p>在题目中内嵌了一个.sys文件，在初始化时将该驱动重命名为一个随机字符串，然后加载驱动。</p>
+<p><img src="/images/tx2026/02-driver-rename.png"></p>
+<p>该驱动受到tvm保护，虚拟化程序较深，逆向不太现实。</p>
+<p><img src="/images/tx2026/03-tvm-1.png"></p>
+<p><img src="/images/tx2026/04-tvm-2.png"></p>
+<p>尝试去dump驱动调用的API序列</p>
+<p><img src="/images/tx2026/05-api-dump.png"></p>
+<p>可以发现驱动有申请物理内存并进行mapping的行为，联想到程序强制要求开启Hyper-V，并且通过调试能够发现.exe程序的check是通过CPUID指令实现的。</p>
+<p><img src="/images/tx2026/06-cpuid-check.png"></p>
+<p>通过AI分析可以了解大概的check过程</p>
+<p><img src="/images/tx2026/07-ai-flow.png"></p>
+<p>猜测驱动映射了一段VMX内存到EPT的不可见的区域，这样就能做到对操作系统不可见，于是想到通过VMware的debugstub来验证猜想，先获取.exe的内存基地址</p>
+<p><img src="/images/tx2026/08-imagebase.png"></p>
+<p>之后通过gdb连接debugstub在cpuid前给用户态程序下断点</p>
+<p><img src="/images/tx2026/09-gdb-break.png"></p>
+<p>单步执行后发现进入了一段全新的代码：</p>
+<p><img src="/images/tx2026/10-hidden-code.png"></p>
+<p>并且其中有vmresume\vmlauch等指令，确认走的是hyper-V层</p>
+<p>基本可以实锤程序运行后会加载隐藏的驱动，驱动中映射内存到操作系统不可见区域，并且所有VMX指令在运行时由驱动动态生成，防止静态分析，最后程序执行CPUID，通过VMX实际执行校验逻辑，以此来隐藏真正的核心代码逻辑。</p>
+<h2 id="编写检测代码，检测（2）中「影」核心系统攻击操作系统底层的特殊方法。（满分2分）"><a href="#编写检测代码，检测（2）中「影」核心系统攻击操作系统底层的特殊方法。（满分2分）" class="headerlink" title="编写检测代码，检测（2）中「影」核心系统攻击操作系统底层的特殊方法。（满分2分）"></a>编写检测代码，检测（2）中「影」核心系统攻击操作系统底层的特殊方法。（满分2分）</h2><p>观察到程序每次启动时通过先执行 CPUID(0xDEADBEEF, 0x114514)，若 EAX &#x3D;&#x3D; 0x01919810 则说明hypervisor已活跃，跳过部署，可以通过同样的方法，主动发送同样的请求，若返回结果为0x01919810，则说明驱动已经部署了VMX代码。</p>
+<p>这是部署前发请求的结果：</p>
+<p><img src="/images/tx2026/11-probe-before.png"></p>
+<p>这是部署后发请求的结果：</p>
+<p><img src="/images/tx2026/12-probe-after.png"></p>
+<p>可以看到正确检测到了题目的程序是否已经攻击操作系统底层。</p>
+<p>程序见附件中detect_hyperch.c</p>
+<p>也可以通过依照往年题目的思路通过直接检测是否处在VT环境下来检测题目攻击是否已经生效，<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-286460.htm#msg_header_h2_7%EF%BC%8C%E4%BD%86%E6%98%AF%E6%9C%80%E7%BB%88%E8%BF%98%E6%98%AF%E8%AE%A4%E4%B8%BA%E8%BF%99%E6%A0%B7%E9%80%9A%E8%BF%87CPUID%E6%A3%80%E6%B5%8B%E7%9A%84%E6%96%B9%E6%B3%95%E6%9C%80%E4%B8%BA%E7%9B%B4%E6%8E%A5%E3%80%82">https://bbs.kanxue.com/thread-286460.htm#msg_header_h2_7，但是最终还是认为这样通过CPUID检测的方法最为直接。</a></p>
+<h2 id="计算出正确的终止密码，输入到shadow-panel-exe中，使得其返回成功。-满分1-0分"><a href="#计算出正确的终止密码，输入到shadow-panel-exe中，使得其返回成功。-满分1-0分" class="headerlink" title="计算出正确的终止密码，输入到shadow_panel.exe中，使得其返回成功。(满分1.0分)"></a>计算出正确的终止密码，输入到shadow_panel.exe中，使得其返回成功。(满分1.0分)</h2><p>通过（2）中介绍的调试的方式可以进入到实际VMX执行的代码段中</p>
+<p><img src="/images/tx2026/10-hidden-code.png"></p>
+<p>一路跟进走到subleaf的分发逻辑</p>
+<p><img src="/images/tx2026/13-subleaf-dispatch.png"></p>
+<p>进入深入可以看到校验密码的逻辑</p>
+<p><img src="/images/tx2026/14-verify-logic.png"></p>
+<p>这里可以通过直接调试读取r8,r9的值得到flag，也可以通过逆向的方式，逆向的话key来自于[page+0x500]和[page+0x508]</p>
+<p><img src="/images/tx2026/15-key-in-page.png"></p>
+<p>通过模拟算法也可以获得最后的flag</p>
+<p><img src="/images/tx2026/16-sim-algo.png"></p>
+<p><img src="/images/tx2026/17-sim-result-1.png"></p>
+<p><img src="/images/tx2026/18-sim-result-2.png"></p>
+<h2 id="编写keygen，使得在任意机器，任何一次运行shadow-panel-exe，都可以正确计算出终止密码。-满分2-5分"><a href="#编写keygen，使得在任意机器，任何一次运行shadow-panel-exe，都可以正确计算出终止密码。-满分2-5分" class="headerlink" title="编写keygen，使得在任意机器，任何一次运行shadow_panel.exe，都可以正确计算出终止密码。(满分2.5分)"></a>编写keygen，使得在任意机器，任何一次运行shadow_panel.exe，都可以正确计算出终止密码。(满分2.5分)</h2><p>由（4）可知，终止密码的密钥来自于[page+0x500]和[page+0x508]，其中page是归属于VMX代码的页，一旦程序进入VT环境，就基本读取不到这个页，因此也无法获取密钥。那就要么转头去逆驱动，看看这一段到底是怎么写入的，调试了一段时间发现VMX代码是由sub_14000FC40处代码动态生成的，这也能解释为什么驱动本身没有出现任何VMX相关的指令。不过这一段虚拟化程序很深，大部分逻辑最终会跑到.tvm0段执行。逆向十分困难。</p>
+<p>考虑多获取几个key看看是否有枚举的可能，于是尝试在多个虚拟机中调试获取密钥，获得了几个不同的密钥：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x247C8B4C00008AEC, 0x00005714003D8070</span><br><span class="line">0x247C8B4C00008B0C, 0x00005714003D8070</span><br></pre></td></tr></table></figure>
 
-<p>两组只差<strong>两个字节</strong>（<code>0x8AEC</code> → <code>0x8B0C</code>），第二个 qword 完全相同。这说明密钥空间比想象中小得多，完全存在枚举的可能。</p>
-<p>所以最终 keygen 的策略是：<strong>枚举低 16 位，把候选值丢给 CPUID 让 hypervisor 自己判断对错</strong>。</p>
-<p>从 VMX 校验代码里还原出的派生算法大致是这样（8 轮混合，两个常量看起来像出厂设置）：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">MASK = <span class="number">0xFFFFFFFFFFFFFFFF</span></span><br><span class="line">C1 = <span class="number">0x9E3779B97F4A7C15</span>          <span class="comment"># 黄金比例，常见于哈希/PRNG</span></span><br><span class="line">C2 = <span class="number">0x40A7B892E31B1A47</span></span><br><span class="line">K1 = <span class="number">0x5348414430574E54</span>          <span class="comment"># &quot;SHAD0WNT&quot;</span></span><br><span class="line">K2 = <span class="number">0x4859504552564D58</span>          <span class="comment"># &quot;HYPERVMX&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">rol64</span>(<span class="params">x, n</span>):</span><br><span class="line">    <span class="keyword">return</span> ((x &lt;&lt; n) | (x &gt;&gt; (<span class="number">64</span> - n))) &amp; MASK</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">derive</span>(<span class="params">seed1, seed2</span>):</span><br><span class="line">    r8 = (seed1 ^ K1) &amp; MASK</span><br><span class="line">    r9 = (seed2 ^ K2) &amp; MASK</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">        r8 = (r8 + ((rol64(r9, <span class="number">13</span>) * C1) &amp; MASK)) &amp; MASK</span><br><span class="line">        r9 = (r9 ^ ((rol64(r8, <span class="number">29</span>) - C2) &amp; MASK)) &amp; MASK</span><br><span class="line">        r8 = (r8 ^ (r9 &gt;&gt; <span class="number">17</span>)) &amp; MASK</span><br><span class="line">        r9 = (r9 + ((r8 &lt;&lt; <span class="number">7</span>) &amp; MASK)) &amp; MASK</span><br><span class="line">    <span class="keyword">return</span> r8, r9</span><br></pre></td></tr></table></figure>
-
-<p><code>r8</code>、<code>r9</code> 就是暴露在寄存器里的那两个值，<code>&quot;SHAD0WNT&quot;</code>、<code>&quot;HYPERVMX&quot;</code> 这两个 immediate 也是从这个函数里认出来的。</p>
-<p>剩下的就是枚举 + 验证。注意不能直接 <code>cpuid</code> 指令——用户态 <code>cpuid</code> 的 EBX 是 CPU 给的，得自己控制四个寄存器，所以用一段 shellcode 包一层：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cpuid_custom(leaf, subleaf, ebx_val, edx_val, result_ptr)</span></span><br><span class="line"><span class="comment"># Windows x64 ABI: rcx=leaf, rdx=subleaf, r8=pwd_high, r9=pwd_low, [rsp+0x28]=result</span></span><br><span class="line">SHELLCODE_64 = <span class="built_in">bytes</span>([</span><br><span class="line">    <span class="number">0x53</span>,                          <span class="comment"># push rbx</span></span><br><span class="line">    <span class="number">0x48</span>, <span class="number">0x89</span>, <span class="number">0xC8</span>,              <span class="comment"># mov rax, rcx</span></span><br><span class="line">    <span class="number">0x48</span>, <span class="number">0x89</span>, <span class="number">0xD1</span>,              <span class="comment"># mov rcx, rdx</span></span><br><span class="line">    <span class="number">0x4C</span>, <span class="number">0x89</span>, <span class="number">0xC3</span>,              <span class="comment"># mov rbx, r8</span></span><br><span class="line">    <span class="number">0x4C</span>, <span class="number">0x89</span>, <span class="number">0xCA</span>,              <span class="comment"># mov rdx, r9</span></span><br><span class="line">    <span class="number">0x0F</span>, <span class="number">0xA2</span>,                    <span class="comment"># cpuid     ← 触发 VM-Exit</span></span><br><span class="line">    <span class="number">0x4C</span>, <span class="number">0x8B</span>, <span class="number">0x44</span>, <span class="number">0x24</span>, <span class="number">0x30</span>,  <span class="comment"># mov r8, [rsp+0x30]</span></span><br><span class="line">    <span class="number">0x49</span>, <span class="number">0x89</span>, <span class="number">0x00</span>,              <span class="comment"># mov [r8],    rax</span></span><br><span class="line">    <span class="number">0x49</span>, <span class="number">0x89</span>, <span class="number">0x58</span>, <span class="number">0x08</span>,        <span class="comment"># mov [r8+8],  rbx</span></span><br><span class="line">    <span class="number">0x49</span>, <span class="number">0x89</span>, <span class="number">0x48</span>, <span class="number">0x10</span>,        <span class="comment"># mov [r8+16], rcx</span></span><br><span class="line">    <span class="number">0x49</span>, <span class="number">0x89</span>, <span class="number">0x50</span>, <span class="number">0x18</span>,        <span class="comment"># mov [r8+24], rdx</span></span><br><span class="line">    <span class="number">0x5B</span>,                          <span class="comment"># pop rbx</span></span><br><span class="line">    <span class="number">0xC3</span>,                          <span class="comment"># ret</span></span><br><span class="line">])</span><br></pre></td></tr></table></figure>
-
-<p>然后是枚举主体：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x247C8B4C00000000</span>, <span class="number">0x247C8B4C00010000</span>):</span><br><span class="line">    pwd_h, pwd_l = derive(i, <span class="number">0x00005714003D8070</span>)</span><br><span class="line">    send, _ = test_password(caller, pwd_h, pwd_l, <span class="number">0xB16B00B5</span>)</span><br><span class="line">    result = send[<span class="number">0</span>] &amp; <span class="number">0xFFFFFFFF</span></span><br><span class="line">    <span class="keyword">if</span> result == <span class="number">1</span>:      <span class="comment"># 校验未通过</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="built_in">hex</span>(pwd_h), <span class="built_in">hex</span>(pwd_l))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;founded&quot;</span>)</span><br><span class="line">    <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
-<p>调用的 subleaf 约定是从调试里确认的：</p>
-<table>
-<thead>
-<tr>
-<th align="left">leaf &#x2F; subleaf</th>
-<th align="left">用途</th>
-<th align="left">返回</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><code>0xDEADBEEF</code> &#x2F; <code>0x114514</code></td>
-<td align="left">探活（心跳）</td>
-<td align="left"><code>EAX == 0x01919810</code> 表示已激活</td>
-</tr>
-<tr>
-<td align="left"><code>0xDEADBEEF</code> &#x2F; <code>0xB16B00B5</code></td>
-<td align="left">密码校验</td>
-<td align="left"><code>EAX == 0</code> 通过，非 0 失败</td>
-</tr>
-<tr>
-<td align="left"><code>0xDEADBEEF</code> &#x2F; <code>0xFACEB00C</code></td>
-<td align="left">回读上一次投递的结果</td>
-<td align="left">按 index 取 EBX&#x2F;ECX&#x2F;EDX</td>
-</tr>
-</tbody></table>
-<p>跑到正确的那一组就会打印出来。</p>
-<p><img src="/images/tx2026/19-keygen-run.png" alt="keygen 运行"></p>
-<p><img src="/images/tx2026/20-keygen-found.png" alt="keygen 命中"></p>
-<p><img src="/images/tx2026/21-keygen-success.png" alt="输入终止密码成功"></p>
-<p>把得到的两个 64 位值按 <code>pwd_high</code> &#x2F; <code>pwd_low</code> 拼成 32 位十六进制串，输入面板即可提示成功。整个过程不依赖具体机器——只要 hypervisor 是同一个版本，枚举 65536 次以内一定能命中。</p>
-<h2 id="6-小结"><a href="#6-小结" class="headerlink" title="6 小结"></a>6 小结</h2><p>这题的设计很有意思，六个评分点其实是一个连贯的叙事，而不是六个孤立的小问：</p>
-<ul>
-<li><strong>它必须先在你的机器上「成功」</strong>，才有后面的攻击；而「成功」的条件（IOMMU + Hyper-V）本身就是一道情报题；</li>
-<li><strong>它的核心代码不在任何可静态分析的二进制里</strong>——既在 TVM 保护的段里，又在运行时才生成的 VMX 代码里，静态分析到这里彻底失效；</li>
-<li><strong>它的通信协议是公开的</strong>：<code>CPUID</code> 成了唯一的突破口，既能用来检测（第 3 题），也能用来爆破（第 5 题）；</li>
-<li><strong>密钥空间被自己的实现压小了</strong>：两个 qword 里只有一个在变，而且只变两个字节，于是「逆向不出来的算法」可以直接交给 hypervisor 当 oracle。</li>
-</ul>
-<p>几个踩过的坑：</p>
-<ol>
-<li>驱动里搜不到任何 VMX 指令，一开始以为分析错了方向，后来才明白是运行时补丁（<code>sub_14000FC40</code>）；</li>
-<li><code>cpuid</code> 在用户态无法任意控制 EBX，必须走 shellcode，否则要么编译不过，要么结果被覆盖；</li>
-<li>进入 VT 环境之后就别想再读 host 侧的内存了，第 4 题能偷懒读寄存器，第 5 题必须老老实实枚举。</li>
-</ol>
-<h2 id="附：AI-使用说明"><a href="#附：AI-使用说明" class="headerlink" title="附：AI 使用说明"></a>附：AI 使用说明</h2><p>按赛题要求说明：分析过程中使用了 AI 辅助（主要是 CFF 混淆代码的梳理、结构体与调用关系的整理、以及部分分析脚本的生成），最终结论均经调试验证。相关脚本与对话记录已随题解一并提交，<code>detect_hypercharge.c</code> 与 <code>keygen_dynamic.py</code> 中的注释标明了 AI 参与的部分。</p>
+<p>观察发现只有两个字节不一样，推测存在枚举的可能性。于是最终的keygen，通过枚举两字节并交予CPUID指令判断正误，最终计算出正确的终止密码，具体代码见附件中的dynamic_keygen.py</p>
+<p>运行效果如图：</p>
+<p><img src="/images/tx2026/19-keygen-run.png"></p>
+<p><img src="/images/tx2026/20-keygen-found.png"></p>
+<p><img src="/images/tx2026/21-keygen-success.png"></p>
 
     </div>
 
@@ -477,7 +385,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2026-%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-%C2%B7-PC-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%C2%B7-%E5%86%B3%E8%B5%9B"><span class="nav-number">1.</span> <span class="nav-text">2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%AE%A9%E5%AE%83%E8%B7%91%E8%B5%B7%E6%9D%A5%EF%BC%9A%E9%83%A8%E7%BD%B2%E6%9D%A1%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">1 让它跑起来：部署条件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Phase-0%EF%BC%9AHyper-V-IOMMU-%E6%A3%80%E6%B5%8B%EF%BC%88sub-144A07540%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">Phase 0：Hyper-V + IOMMU 检测（sub_144A07540）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Phase-1%EF%BC%9AVHD-%E8%B7%AF%E5%BE%84%E5%87%86%E5%A4%87%EF%BC%88sub-144A075F0%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">Phase 1：VHD 路径准备（sub_144A075F0）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Phase-2%EF%BC%9A%E9%A9%B1%E5%8A%A8%E9%83%A8%E7%BD%B2%EF%BC%88sub-144A07620-%E2%86%92-sub-144A05540%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">Phase 2：驱动部署（sub_144A07620 → sub_144A05540）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Phase-3%EF%BC%9AHypervisor-%E6%BF%80%E6%B4%BB%E9%AA%8C%E8%AF%81%EF%BC%88sub-144A07650%EF%BC%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">Phase 3：Hypervisor 激活验证（sub_144A07650）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%AE%83%E5%88%B0%E5%BA%95%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9A%E5%BA%95%E5%B1%82%E6%94%BB%E5%87%BB%E4%B8%8E%E4%BB%A3%E7%A0%81%E9%9A%90%E8%97%8F"><span class="nav-number">1.2.</span> <span class="nav-text">2 它到底做了什么：底层攻击与代码隐藏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%A3%80%E6%B5%8B%E4%BB%A3%E7%A0%81%EF%BC%9A%E6%80%8E%E4%B9%88%E5%8F%91%E7%8E%B0%E8%BF%99%E5%8F%B0%E6%9C%BA%E5%99%A8%E8%A2%AB%E3%80%8C%E6%8F%92%E3%80%8D%E4%BA%86%E4%B8%80%E9%92%88"><span class="nav-number">1.3.</span> <span class="nav-text">3 检测代码：怎么发现这台机器被「插」了一针</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%BB%88%E6%AD%A2%E5%AF%86%E7%A0%81%EF%BC%9A%E8%BF%9B%E5%88%B0-VMX-%E9%87%8C%E5%8E%BB%E7%9C%8B"><span class="nav-number">1.4.</span> <span class="nav-text">4 终止密码：进到 VMX 里去看</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Keygen%EF%BC%9A%E6%8D%A2%E4%B8%AA%E6%9C%BA%E5%99%A8%E4%B9%9F%E5%BE%97%E8%83%BD%E7%AE%97%E5%87%BA%E6%9D%A5"><span class="nav-number">1.5.</span> <span class="nav-text">5 Keygen：换个机器也得能算出来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%B0%8F%E7%BB%93"><span class="nav-number">1.6.</span> <span class="nav-text">6 小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%EF%BC%9AAI-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="nav-number">1.7.</span> <span class="nav-text">附：AI 使用说明</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E3%80%8C%E5%BD%B1%E3%80%8D%E6%A0%B8%E5%BF%83%E7%B3%BB%E7%BB%9F%E3%80%8C%E6%A0%B9%E3%80%8D%E9%9C%80%E8%A6%81%E5%9C%A8%E4%B8%80%E4%BA%9B%E5%BC%80%E5%90%AF%E4%BA%86%E7%89%B9%E6%AE%8A%E7%89%B9%E6%80%A7%E7%9A%84%E6%9C%BA%E5%99%A8%E4%B8%8A%E6%89%8D%E8%83%BD%E9%83%A8%E7%BD%B2%E6%88%90%E5%8A%9F%EF%BC%8C%E9%80%86%E5%90%91%E6%89%BE%E5%88%B0%E6%88%90%E5%8A%9F%E9%83%A8%E7%BD%B2%E6%9D%A1%E4%BB%B6%EF%BC%81%E6%88%90%E5%8A%9F%E9%83%A8%E7%BD%B2%E3%80%8C%E5%BD%B1%E3%80%8D%E6%A0%B8%E5%BF%83%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%8D%B3%E6%88%90%E5%8A%9F%E8%BF%90%E8%A1%8Cshadow-panel-exe%EF%BC%8C%E6%8E%A7%E5%88%B6%E5%8F%B0%E7%A8%8B%E5%BA%8F%E6%88%90%E5%8A%9F%E8%BF%90%E8%A1%8C%E8%BF%9B%E5%85%A5%E8%87%B3%E8%BE%93%E5%85%A5%E7%BB%88%E6%AD%A2%E5%AF%86%E7%A0%81%E7%9A%84%E7%BB%88%E7%AB%AF%E3%80%82-%E6%BB%A1%E5%88%860-5%E5%88%86"><span class="nav-number">1.</span> <span class="nav-text">「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E3%80%8C%E6%A0%B9%E3%80%8D%E4%BD%BF%E7%94%A8%E7%89%B9%E6%AE%8A%E6%96%B9%E6%B3%95%EF%BC%8C%E5%AF%B9%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%BA%95%E5%B1%82%E8%BF%9B%E8%A1%8C%E4%BA%86%E6%94%BB%E5%87%BB%EF%BC%8C%E5%B9%B6%E5%80%9F%E6%AD%A4%E5%B0%86%E5%85%B3%E9%94%AE%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E9%9A%90%E8%97%8F%E4%BA%86%E8%B5%B7%E6%9D%A5%EF%BC%8C%E5%88%86%E6%9E%90%E5%85%B6%E5%AE%8C%E6%95%B4%E5%AE%9E%E7%8E%B0%E6%B5%81%E7%A8%8B%E3%80%82%EF%BC%88%E6%BB%A1%E5%88%862-5%E5%88%86%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">「根」使用特殊方法，对操作系统底层进行了攻击，并借此将关键核心代码隐藏了起来，分析其完整实现流程。（满分2.5分）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E6%A3%80%E6%B5%8B%E4%BB%A3%E7%A0%81%EF%BC%8C%E6%A3%80%E6%B5%8B%EF%BC%882%EF%BC%89%E4%B8%AD%E3%80%8C%E5%BD%B1%E3%80%8D%E6%A0%B8%E5%BF%83%E7%B3%BB%E7%BB%9F%E6%94%BB%E5%87%BB%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%BA%95%E5%B1%82%E7%9A%84%E7%89%B9%E6%AE%8A%E6%96%B9%E6%B3%95%E3%80%82%EF%BC%88%E6%BB%A1%E5%88%862%E5%88%86%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">编写检测代码，检测（2）中「影」核心系统攻击操作系统底层的特殊方法。（满分2分）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%87%BA%E6%AD%A3%E7%A1%AE%E7%9A%84%E7%BB%88%E6%AD%A2%E5%AF%86%E7%A0%81%EF%BC%8C%E8%BE%93%E5%85%A5%E5%88%B0shadow-panel-exe%E4%B8%AD%EF%BC%8C%E4%BD%BF%E5%BE%97%E5%85%B6%E8%BF%94%E5%9B%9E%E6%88%90%E5%8A%9F%E3%80%82-%E6%BB%A1%E5%88%861-0%E5%88%86"><span class="nav-number">4.</span> <span class="nav-text">计算出正确的终止密码，输入到shadow_panel.exe中，使得其返回成功。(满分1.0分)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E5%86%99keygen%EF%BC%8C%E4%BD%BF%E5%BE%97%E5%9C%A8%E4%BB%BB%E6%84%8F%E6%9C%BA%E5%99%A8%EF%BC%8C%E4%BB%BB%E4%BD%95%E4%B8%80%E6%AC%A1%E8%BF%90%E8%A1%8Cshadow-panel-exe%EF%BC%8C%E9%83%BD%E5%8F%AF%E4%BB%A5%E6%AD%A3%E7%A1%AE%E8%AE%A1%E7%AE%97%E5%87%BA%E7%BB%88%E6%AD%A2%E5%AF%86%E7%A0%81%E3%80%82-%E6%BB%A1%E5%88%862-5%E5%88%86"><span class="nav-number">5.</span> <span class="nav-text">编写keygen，使得在任意机器，任何一次运行shadow_panel.exe，都可以正确计算出终止密码。(满分2.5分)</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

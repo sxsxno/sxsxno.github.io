@@ -317,7 +317,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-11-04 22:20:00 / 修改时间：22:18:23" itemprop="dateCreated datePublished" datetime="2026-11-04T22:20:00+08:00">2026-11-04</time>
+              <time title="创建时间：2026-11-04 22:20:00 / 修改时间：22:28:23" itemprop="dateCreated datePublished" datetime="2026-11-04T22:20:00+08:00">2026-11-04</time>
             </span>
 
           
@@ -331,48 +331,45 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛"><a href="#2026-腾讯游戏安全技术竞赛-·-PC-客户端安全-·-决赛" class="headerlink" title="2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛"></a>2026 腾讯游戏安全技术竞赛 · PC 客户端安全 · 决赛</h1><p>赛题把「影子组织」的控制中枢「根」摆在面前：一个 <code>shadow_panel.exe</code> 要求输入 16 字节的终止密码，而它真正的校验逻辑根本不在用户态，甚至不在驱动里——只有先让程序把机器虚拟化掉，才能看到那段代码。</p>
-<p>六个评分点其实就是一条完整的攻击链：怎么装上去 → 装上去做了什么 → 怎么检测 → 怎么拿到密码 → 怎么在别的机器上也算出来。下面按这条顺序记录。</p>
-<table>
-<thead>
-<tr>
-<th align="left">#</th>
-<th align="left">要求</th>
-<th align="left">分值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">1</td>
-<td align="left">找到部署条件，成功运行 <code>shadow_panel.exe</code> 进入密码终端</td>
-<td align="left">0.5</td>
-</tr>
-<tr>
-<td align="left">2</td>
-<td align="left">分析对操作系统底层攻击、隐藏核心代码的完整实现</td>
-<td align="left">2.5</td>
-</tr>
-<tr>
-<td align="left">3</td>
-<td align="left">编写检测代码，检测该攻击手法</td>
-<td align="left">2.0</td>
-</tr>
-<tr>
-<td align="left">4</td>
-<td align="left">计算出终止密码</td>
-<td align="left">1.0</td>
-</tr>
-<tr>
-<td align="left">5</td>
-<td align="left">编写 keygen，任意机器任意一次运行都能算出密码</td>
-<td align="left">2.5</td>
-</tr>
-<tr>
-<td align="left">6</td>
-<td align="left">完整解题过程与源码</td>
-<td align="left">1.5</td>
-</tr>
-</tbody></table>
-<p>环境：VMware 里的 Windows 10 1909（开启嵌套虚拟化 &#x2F; VT-x），IDA Pro、VMware debug stub + gdb、Python 3。</p>
+          <h2 id="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow-panel-exe，控制台程序成功运行进入至输入终止密码的终端。-满分0-5分"><a href="#「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow-panel-exe，控制台程序成功运行进入至输入终止密码的终端。-满分0-5分" class="headerlink" title="「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)"></a>「影」核心系统「根」需要在一些开启了特殊特性的机器上才能部署成功，逆向找到成功部署条件！成功部署「影」核心系统，即成功运行shadow_panel.exe，控制台程序成功运行进入至输入终止密码的终端。(满分0.5分)</h2><p>启动阶段执行了如下操作：</p>
+<p>Phase 0（sub_144A07540）：Hyper-V + IOMMU 检测</p>
+<ol>
+<li><p>CPUID(1) → 检查 ECX bit 31（Hypervisor Present bit）</p>
+</li>
+<li><p>CPUID(0x40000000) → 验证 Hypervisor vendor &#x3D; “Microsoft Hv”</p>
+</li>
+<li><p>IOMMU (DMAR&#x2F;IVRS) → 通过 NtQuerySystemInformation(76) 查询 ACPI 固件表，检查是否存在：</p>
+</li>
+</ol>
+<p>   - Intel VT-d: DMAR 表签名 0x52414D44</p>
+<p>   - AMD-Vi: IVRS 表签名 0x53525649</p>
+<p>Phase 1（sub_144A075F0）：VHD路径准备</p>
+<ul>
+<li><p>准备 VHD 部署路径 C:\Windows\Temp\WdiServiceHost\</p>
+</li>
+<li><p>清理旧文件</p>
+</li>
+</ul>
+<p>Phase 2（sub_144A07620）：驱动部署</p>
+<ul>
+<li>调用 sub_144A05540 进行驱动部署：</li>
+</ul>
+<p>  1. 先执行 CPUID(0xDEADBEEF, 0x114514)，若 EAX &#x3D;&#x3D; 0x01919810 则说明hypervisor已活跃，跳过部署</p>
+<p>  2. 生成随机服务名，构建路径 + “.sys”</p>
+<p>  3. CreateFileW → WriteFile（驱动blob来自 .data 段 unk_145CCA010）→ CloseHandle</p>
+<p>  4. 通过.tvm0中的代码创建&#x2F;挂载VHD并部署驱动</p>
+<p>  5. OpenSCManagerW → 清理服务 → DeleteFileW</p>
+<p>Phase 3（sub_144A07650）：Hypervisor激活验证</p>
+<ul>
+<li><p>再次 CPUID(0xDEADBEEF, 0x114514)</p>
+</li>
+<li><p>验证 EAX &#x3D;&#x3D; 0x01919810（26318864 十进制）</p>
+</li>
+<li><p>确认 HyperCharge hypervisor 已成功安装并激活</p>
+</li>
+</ul>
+<p>因此需要机器需要支持IOMMU，并且开启了Hyper-V之后，通过管理员权限启动shadow_panel.exe即可进入输入密码的终端。启动后可以看见输入框</p>
+<p><img src="/images/tx2026/01-panel.png"></p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2026/11/04/2026%E8%85%BE%E8%AE%AF%E6%B8%B8%E6%88%8F%E5%AE%89%E5%85%A8%E6%8A%80%E6%9C%AF%E7%AB%9E%E8%B5%9B-PC%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8-%E4%B8%AA%E4%BA%BA%E9%A2%98%E8%A7%A3/#more" rel="contents">
